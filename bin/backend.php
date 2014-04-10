@@ -5,6 +5,8 @@ require_once "conf.php";
 
 require_once "user.php";
 require_once "group.php";
+require_once "item.php";
+require_once "transaction.php";
 
 date_default_timezone_set("UTC");
 
@@ -93,16 +95,16 @@ class Backend extends DefaultIRest {
             /* Create new tables */
             $this->sql($conn,
                        "CREATE TABLE tbl_user (" .
-                       "email VARCHAR(100)," .
-                       "name VARCHAR(100)," .
+                       "email    VARCHAR(100)," .
+                       "name     VARCHAR(100)," .
                        "password VARCHAR(40)," .
-                       "address VARCHAR(100)," .
-                       "phone VARCHAR(20)," .
+                       "address  VARCHAR(100)," .
+                       "phone    VARCHAR(20)," .
                        "PRIMARY KEY (email))");
             
             $this->sql($conn,
                        "CREATE TABLE tbl_session (" .
-                       "email VARCHAR(100) NOT NULL," .
+                       "email       VARCHAR(100) NOT NULL," .
                        "session_key RAW(16) DEFAULT SYS_GUID()," .
                        "PRIMARY KEY (email, session_key)," .
                        "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE CASCADE)");
@@ -132,7 +134,7 @@ class Backend extends DefaultIRest {
                        "item_id   RAW(16) DEFAULT SYS_GUID()," .
                        "idesc     VARCHAR(1000)," .
                        "price     NUMBER(10, 2)," .
-                       "cname     VARCHAR(100) NOT NULL," .
+                       "cname     VARCHAR(100)," .
                        "email     VARCHAR(100) NOT NULL," .
                        "post_date DATE," .
                        "PRIMARY KEY (item_id)," .
@@ -193,6 +195,8 @@ class Backend extends DefaultIRest {
             return SessionManager::instance()->dispatch($remain);
         case "group":
             return GroupManager::instance()->dispatch($remain);
+        case "item":
+            return ItemManager::instance()->dispatch($remain);
         default:
             return NULL;            
         }
