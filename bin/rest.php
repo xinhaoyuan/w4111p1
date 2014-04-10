@@ -8,16 +8,20 @@ $o = Backend::instance()->dispatch($path);
 $r = NULL;
 
 if ($o instanceof IREST) {
-    switch ($method) {
-    case "GET":
-        $r = $o->get($_REQUEST);
-        break;
-    case "POST":
-        $r = $o->post($_REQUEST);
-        break;
-    case "PUT":
-        $r = $o->put($_REQUEST);
-        break;
+    try {
+        switch ($method) {
+        case "GET":
+            $r = $o->get($_REQUEST);
+            break;
+        case "POST":
+            $r = $o->post($_REQUEST);
+            break;
+        case "PUT":
+            $r = $o->put($_REQUEST);
+            break;
+        }
+    } catch (Exception $e) {
+        $r = Backend::instance()->handleException($e);
     }
 } else $r = NULL;
 

@@ -3,6 +3,9 @@
 require_once "restful.php";
 require_once "conf.php";
 
+require_once "user.php";
+require_once "group.php";
+
 date_default_timezone_set("UTC");
 
 class Backend extends DefaultIRest {
@@ -32,6 +35,7 @@ class Backend extends DefaultIRest {
     public function sql($conn, $sql) {
         $result = $conn->query($sql);
         if ($result === FALSE) throw new Exception("sql error: " . $sql);
+        return $result;
     }
 
     public function reset_db() {
@@ -62,6 +66,7 @@ class Backend extends DefaultIRest {
                        "address VARCHAR(100)," .
                        "phone VARCHAR(20)," .
                        "PRIMARY KEY (email));");
+            
             $this->sql($conn,
                        "CREATE TABLE tbl_session (" .
                        "email VARCHAR(100) NOT NULL," .
@@ -95,7 +100,7 @@ class Backend extends DefaultIRest {
                        "price FLOAT," .
                        "cname VARCHAR(100) NOT NULL," .
                        "email VARCHAR(100) NOT NULL," .
-                       "post_date DATE," .
+                       "post_date DATETIME," .
                        "PRIMARY KEY (item_id)," .
                        "FOREIGN KEY (cname) REFERENCES tbl_catagory ON DELETE NO ACTION," .
                        "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE NO ACTION" .
@@ -149,7 +154,9 @@ class Backend extends DefaultIRest {
         case "user":
             return UserManager::instance()->dispatch($remain);
         case "session":
-            return SessionManager::instace()->dispatch($remain);
+            return SessionManager::instance()->dispatch($remain);
+        case "group":
+            return GroupManager::instance()->dispatch($remain);
         default:
             return NULL;            
         }
@@ -164,9 +171,13 @@ class Backend extends DefaultIRest {
 
         return ["result" => "nothing to do"];
     }
+
+    public function handleException(Exception $e) {
+        return "Exception(" . $e->getMessage() . ")\n";
+    }
 };
 
-class UserManager extends DefaultIRest {
+class ItemManager extends DefaultIRest {
 
     public static function instance() {
         static $instance;
@@ -185,118 +196,52 @@ class UserManager extends DefaultIRest {
             return $this;
         }
 
-        $email = $name;
-        return new UserProxy($email);
+        $item_id = $name;
+        return new ItemProxy($item_id);
     }
 
     public function post($args) {
-        /* register new users */
+        /* post new items */
+        if (!SessionManager::instance()->authenticate_session($args))
+            return ["result" => "failed",
+                    "reason" => "authentication failed"];
         
-        $email    = $args["email"];
-        $name     = $args["name"];
-        $password = $args["password"];
-        $address  = $args["address"];
-        $phone    = $args["phone"];
+        $iname = $args["iname"];
+        $idesc = $args["idesc"];
+        $price = (float)$args["price"];
+        $cname = $args["cname"];
+        $email = $args["email"];
 
         $conn = Backend::instance()->get_db_conn();
 
         try {
             Backend::instance()->sql($conn,
-                                     'INSERT INTO tbl_user (email, name, password, address, phone) VALUES ' .
-                                     '("' . $email . '", "' . $name . '", "' . $password . '", "' .
-                                     $address . '", "' . $phone . '");');
-        } catch (Exception $e) {
-            try {
-                $r = Backend::instance()->sql($conn,
-                                              'SELECT COUNT(*) FROM tbl_user WHERE email = "' . $email . '";');
-                $count = (int)$r->fetch_row()[0];
-            } catch (Exception $e) {
-                $count = 0;
-            }
-            
-            if ($count === 1) {
-                /* user already exists */
-                return ["result" => "failed",
-                        "reason" => "user already exists"];
-            } else {
-                /* other reason */
-                return ["result" => "failed",
-                        "reason" => "sql error"];
-            }
-        }
-
-        /* register success */
-        return ["result" => "success"];
-    }
-};
-
-class SessionManager extends DefaultIRest {
-    public static function instance() {
-        static $instance;
-        if (!($instance instanceof self))
-            $instance = new self();
-        return $instance; 
-    }
-
-    public function __construct() {
-    }
-
-    public function dispatch($path) {
-        return $this;
-    }
-
-    public function post($args) {
-        /* login to get session id */
-        $email = $args["email"];
-        $password = $args["password"];
-
-        try {
-            $conn = Backend::instance()->get_db_conn();
-            $r = Backend::instance()->sql($conn,
-                                          "SELECT COUNT(*) FROM tbl_user WHERE email = \"" . $email . "\" AND password = \"" . $password . "\";");
-            if ((int)$r->fetch_row()[0] == 1) {
-                /* success */
-                $session_key = sha1((string)time() . $password);
-                Backend::instance()->sql($conn,
-                                         "INSERT IGNORE INTO tbl_session (email, session_key) values " .
-                                         "(\"" . $email . "\", \"" . $session_key . "\");");
-                return ["result" => "success",
-                        "session_key" => $session_key];
-            } else {
-                /* mismatch */
-                return ["result" => "failed",
-                        "reason" => "mismatch"];
-            }
+                                     "INSERT INTO tbl_item (iname, idesc, price, cname, email, post_date) " .
+                                     "VALUES ('$iname', '$idesc', '$price', '$cname', '$email', now());");
         } catch (Exception $e) {
             return ["result" => "failed",
                     "reason" => "sql error"];
         }
+
+        /* creation success */
+        return ["result" => "success"];
     }
 
-    public function authenticate_session($args) {
+    public function get($args) {
+        /* list all items */
+        if (!SessionManager::instance()->authenticate_session($args))
+            return ["result" => "failed",
+                    "reason" => "authentication failed"];
+
         $email = $args["email"];
-        $session_key = $args["session_key"];
 
-        try {
-            $conn = Backend::instance()->get_db_conn();
-            $r = Backend::instance()->sql($conn,
-                                          "SELECT COUNT(*) FROM tbl_session WHERE email = \"" . $email .
-                                          "\" and session_key = \"" . $session_key . "\";");
-            if ((int)$r->fetch_row()[0] == 1) {
-                return TRUE;
-            } else throw new Exception("not found");
-        } catch (Exception $e) {
-            return FALSE;
-        }
-    }
-}
-
-class UserProxy extends DefaultIRest {
-    private $_email;
-    
-    public function __construct($email) {
-        $this->_email = $email;
+        $conn = Backend::instance()->get_db_conn();
+        $r = Backend::instance()->sql($conn,
+                                      "SELECT i.item_id FORM tbl_item i, tbl_user_group ug2, tbl_user_group ug " .
+                                      "WHERE ug.email = '$email' AND ug2.gname = ug.gname AND ug.email = i.email;");
+        return $r->fetch_row();
     }
 };
+
 
 ?>
