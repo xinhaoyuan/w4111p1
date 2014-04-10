@@ -143,7 +143,7 @@ $r = $b->dispatch("/item/$item_id/")->get(
 var_dump($r); echo "<br />";
 
 $r = $b->dispatch("/item/$item_id/photo/")->post(
-    array("image_data" => "ABC"));
+    array("image_url" => "THIS IS A URL"));
 
 var_dump($r); echo "<br />";
 

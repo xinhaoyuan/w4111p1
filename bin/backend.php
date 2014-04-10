@@ -144,7 +144,7 @@ class Backend extends DefaultIRest {
 
             $this->sql($conn,
                        "CREATE TABLE tbl_photo (" .
-                       "image_data BLOB," .
+                       "image_url  VARCHAR(1000)," .
                        "image_id   RAW(16) DEFAULT SYS_GUID()," .
                        "item_id    RAW(16) NOT NULL," .
                        "PRIMARY KEY (image_id)," .
@@ -231,7 +231,8 @@ class Backend extends DefaultIRest {
                       "price" => "9.08"));
 
             var_dump($r); echo "<br />";
-
+            $item_id1 = $r["item_id"];
+            
             $r = $this->dispatch("/item/")->post(
                 array("email" => "b@b.com",
                       "session_key" => $sk2,
@@ -240,6 +241,15 @@ class Backend extends DefaultIRest {
                       "price" => "9.08"));
 
             var_dump($r); echo "<br />";
+            $item_id2 = $r["item_id"];
+
+            $r = $this->dispatch("/item/$item_id1/photo/")->post(
+                array("email" => "a@b.com",
+                      "session_key" => $sk1,
+                      "image_url" => "http://ecx.images-amazon.com/images/I/71sw4gQqheL._SL1500_.jpg"));
+
+            var_dump($r); echo "<br />";
+
             
         } catch (Exception $e) {
             echo $e->getMessage();

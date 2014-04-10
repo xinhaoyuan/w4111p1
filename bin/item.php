@@ -40,20 +40,24 @@ class ItemManager extends DefaultIRest {
             $cname = "'$cname'";
         } else $cname = "NULL";
         $email = $args["email"];
-        
-        $conn = Backend::instance()->get_db_conn();
 
         try {
-            Backend::instance()->sql($conn,
-                                     "INSERT INTO tbl_item (iname, idesc, price, cname, email, post_date) " .
-                                     "VALUES ('$iname', '$idesc', $price, $cname, '$email', SYSDATE)");
+            $conn = Backend::instance()->get_db_conn();
+            $st = oci_parse($conn,
+                            "INSERT INTO tbl_item (iname, idesc, price, cname, email, post_date) " .
+                            "VALUES ('$iname', '$idesc', $price, $cname, '$email', SYSDATE) " .
+                            "RETURNING item_id INTO :item_id");
+            oci_bind_by_name($st, ":item_id", $id, 32);
+            oci_execute($st);
+            oci_free_statement($st);
         } catch (Exception $e) {
             return array("result" => "failed",
                          "reason" => "sql error");
         }
 
         /* creation success */
-        return array("result" => "success");
+        return array("result" => "success",
+                     "item_id" => "$id");
     }
 
     public function get($args) {
@@ -126,11 +130,14 @@ class ItemProxy extends DefaultIRest {
 
         $r = Backend::instance()->sql_for_result(
             $conn,
-            "SELECT RAWTOHEX(p.image_id) as photo_id FROM tbl_photo p WHERE p.item_id = '$this->_item_id'");
+            "SELECT RAWTOHEX(p.image_id)as photo_id, p.image_url FROM tbl_photo p WHERE p.item_id = '$this->_item_id'");
 
         $photo_arr = [];
-        while ($photo = sql_extract_row($r)) {
-            array_push($photo_arr, $photo[0]);
+        while ($photo = sql_extract_assoc($r)) {
+            array_push($photo_arr,
+                       array("photo_id" => $photo["PHOTO_ID"],
+                             "image_url" => $photo["IMAGE_URL"])
+                );
         }
         Backend::instance()->sql_close_result($r);
 
@@ -154,18 +161,13 @@ class ItemPhotoManager extends DefaultIRest {
 
     public function post($args) {
         $conn = Backend::instance()->get_db_conn();
-        $dlob = oci_new_descriptor($conn);
+        $url = $args["image_url"];
         $st = oci_parse($conn,
-                        "INSERT INTO tbl_photo (item_id, image_data) VALUES " .
-                        "('$this->_item_id', EMPTY_BLOB()) " .
-                        "RETURNING image_data, image_id INTO :blobdata, :image_id");
-        oci_bind_by_name($st, ":blobdata", $dlob, -1, OCI_B_BLOB);
+                        "INSERT INTO tbl_photo (item_id, image_url) VALUES " .
+                        "('$this->_item_id', '$url') " .
+                        "RETURNING image_id INTO :image_id");
         oci_bind_by_name($st, ":image_id", $id, 32);
-        oci_execute($st, OCI_NO_AUTO_COMMIT);
-        if ($dlob->save($args["image_data"])) {
-            oci_commit($conn);
-        }
-        $dlob->free();
+        oci_execute($st);
         oci_free_statement($st);
 
         return array("result" => "success",
