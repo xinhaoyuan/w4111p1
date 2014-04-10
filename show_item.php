@@ -17,24 +17,6 @@ $user = $b->dispatch("/user/" . $email . "/")->get(
 		["email" => $email,
 		"session_key" => $sk]);
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-	$new_address = refine_post("new_address");
-	$new_phone = refine_post("new_phone");
-	$new_user = $b->dispatch("/user/" . $email . "/")->put(
-			["email" => $email,
-			"session_key" => $sk,
-			"address" => $new_address,
-			"phone" => $new_phone ]);
-	if($new_user["result"] == "success"){
-		$changeInfo = "Profile Change Success!";
-		$user = $b->dispatch("/user/" . $email . "/")->get(
-				["email" => $email,
-				"session_key" => $sk]);
-	}
-	else
-		$changeInfo = "Profile Change Failed!" + $new_user["reason"];
-}
-
 // Retrieving the detail for this item
 $item_id = $_GET["item_id"];
 $item = $b->dispatch("/item/" . $item_id . "/")->get([]);
@@ -47,24 +29,6 @@ $photos = $item["photos"];
 <!DOCTYPE=HTML>
 <html>
 <body>
-Login Success! <br>
-Dear <?php echo $user['name'];?>, How are you today? <br>
-We have your address and phone number on file: <br>
-<form method="post">
-<table>
-<tr>
-	<td> Address: </td>
-	<td> <?php echo empty($user['address'])?"Not On File":$user['address'];?> </td>
-	<td> <input type="text" name="new_address"> </td>
-</tr>
-<tr>
-	<td> Phone number: </td>
-	<td> <?php echo empty($user['phone'])?"Not On File":$user['phone'];?> </td>
-	<td> <input type="text" name="new_phone"> </td>
-</tr>
-</table>
-<td> <input type="submit" name="change_profile" value="Change Profile"> </td>
-</form>
 <?php echo $changeInfo; ?>
 <form method="post" action="logout.php"> <input type="submit" name="logout" value="Logout"> </form>
 <h2> Item Name:</h2>
@@ -85,11 +49,25 @@ foreach($photos as $photo){
 }
 ?>
 
-<h2> My Transactions: </h2>
+<h2> Transactions of this item: </h2>
+<table border="1">
+    <tr>
+        <td>Transaction ID</td>
+        <td>Buyer</td>
+        <td>Last date</td>
+    </tr>
+<?php
+	foreach($item["transactions"] as $transaction){
+		var_dump($transaction);
+		$buyer = $b->dispatch("/user/" . $transaction["email"] . "/") ->get([]);
+		echo "<tr><td>" .
+			"<a href=\"show_trans.php?tid=" . $transaction["trans_id"] ."\">"
+			. $transaction["trans_id"] . "</a></td><td>" .
+			$buyer["name"] . "</td><td>" .
+			$transaction["last_date"] . "</td></tr>";
+	}
+?>
+</table>
 
 </body>
-
-
-
-
 </html>
