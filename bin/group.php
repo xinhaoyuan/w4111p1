@@ -35,30 +35,31 @@ class GroupManager extends DefaultIRest {
 
         try {
             Backend::instance()->sql($conn,
-                                     'INSERT INTO tbl_group (gname, gdesc) VALUES ' .
-                                     '("' . $gname . '", "' . $gdesc . '");');
+                                     "INSERT INTO tbl_group (gname, gdesc) VALUES " .
+                                     "('$gname', '$gdesc')");
         } catch (Exception $e) {
             try {
-                $r = Backend::instance()->sql($conn,
-                                              'SELECT COUNT(*) FROM tbl_group WHERE gname = "' . $gname . '";');
-                $count = (int)$r->fetch_row()[0];
+                $r = Backend::instance()->sql_for_result($conn,
+                                              "SELECT COUNT(*) FROM tbl_group WHERE gname = '$gname'");
+                $count = (int)sql_extract_row($r);
+                Backend::instance()->sql_close_result($r);
             } catch (Exception $e) {
                 $count = 0;
             }
             
             if ($count === 1) {
                 /* user already exists */
-                return ["result" => "failed",
-                        "reason" => "group already exists"];
+                return array("result" => "failed",
+                             "reason" => "group already exists");
             } else {
                 /* other reason */
-                return ["result" => "failed",
-                        "reason" => "sql error"];
+                return array("result" => "failed",
+                             "reason" => "sql error");
             }
         }
 
         /* creation success */
-        return ["result" => "success"];
+        return array("result" => "success");
     }
 };
 
@@ -72,29 +73,35 @@ class GroupProxy extends DefaultIRest {
     public function get($args) {
         try {
             $conn = Backend::instance()->get_db_conn();
-            $r = Backend::instance()->sql(
-                $conn, "SELECT * FROM tbl_group WHERE gname = \"" . $this->_gname . "\";");
-            $r = $r->fetch_row()[0];
+            $result = Backend::instance()->sql_for_result(
+                $conn, "SELECT * FROM tbl_group WHERE gname = '$this->_gname'");
+            $r = sql_extract_assoc($result);
+            Backend::instance()->sql_close_result($result);
         } catch (Exception $e) {
-            return ["result" => "failed",
-                    "reason" => "sql error"];
+            return array("result" => "failed",
+                         "reason" => "sql error");
         }
 
-        return ["result" => "success",
-                "gname"  => $r["gname"],
-                "gdesc"  => $r["gdesc"]];
+        return array("result" => "success",
+                     "gname"  => $r["GNAME"],
+                     "gdesc"  => $r["GDESC"]);
     }
 
     public function post($args) {
         if (!SessionManager::instance()->authenticate_session($args))
-            return ["result" => "failed",
-                    "reason" => "authentication failed"];
+            return array("result" => "failed",
+                         "reason" => "authentication failed");
+
+        $email = $args["email"];
+        $gname = $this->_gname;
         
         try {
             $conn = Backend::instance()->get_db_conn();
-            $r = Backend::instance()->sql(
-                $conn, "INSERT IGNORE INTO tbl_user_group (email, gname) VALUES (\"" .
-                $email . "\", \"" . $gname . "\");");
+            try {
+                $r = Backend::instance()->sql(
+                    $conn, "INSERT INTO tbl_user_group (email, gname) VALUES ".
+                    "('$email', '$gname');");
+            } catch (Exception $e) { }
 
             return ["result" => "success"];
             

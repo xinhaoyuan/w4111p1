@@ -8,6 +8,14 @@ require_once "group.php";
 
 date_default_timezone_set("UTC");
 
+function sql_extract_assoc($r) {
+    return oci_fetch_assoc($r);    
+}
+
+function sql_extract_row($r) {
+    return oci_fetch_row($r);
+}
+
 class Backend extends DefaultIRest {
     public static function instance() {
         static $instance;
@@ -27,15 +35,39 @@ class Backend extends DefaultIRest {
     public function get_db_conn() {
         if ($this->_conn === NULL)
             $this->_conn = $this->_config->get_db_conn();
-        if ($this->_conn->connect_errno)
-            $this->_conn = NULL;
         return $this->_conn;
     }
 
     public function sql($conn, $sql) {
-        $result = $conn->query($sql);
-        if ($result === FALSE) throw new Exception("sql error: " . $sql);
+        error_log($sql);
+        $stid = oci_parse($conn, $sql);
+        if (!$stid)
+            throw new Exception(oci_error($conn)["message"]);
+        $result = oci_execute($stid);
+        if (!$result)
+            throw new Exception(oci_error($stid)["message"]);
+        oci_free_statement($stid);
         return $result;
+    }
+
+    public function sql_for_result($conn, $sql) {
+        error_log($sql);
+        $stid = oci_parse($conn, $sql);
+        if (!$stid)
+            throw new Exception(oci_error($conn)["message"]);
+        $result = oci_execute($stid);
+        if (!$result)
+            throw new Exception(oci_error($stid)["message"]);
+        return $stid;
+    }
+
+    public function sql_close_result($r) {
+        oci_free_statement($r);
+    }
+
+    public function clear_db_conn() {
+        if (!($this->conn === NULL))
+            oci_close($this->conn);
     }
 
     public function reset_db() {
@@ -47,15 +79,16 @@ class Backend extends DefaultIRest {
         } catch (Exception $e) { }
             
         try {
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_user;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_session;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_group;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_user_group;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_catagory;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_item;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_photo;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_transaction;");
-            $this->sql($conn, "DROP TABLE IF EXISTS tbl_message;");
+            try { $this->sql($conn, "DROP TABLE tbl_user_group"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_session"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_group"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_photo"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_message"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_transaction"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_item"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_catagory"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP TABLE tbl_user"); } catch (Exception $e) { }
+            try { $this->sql($conn, "DROP SEQUENCE seq_id"); } catch (Exception $e) { }
             
             /* Create new tables */
             $this->sql($conn,
@@ -65,77 +98,80 @@ class Backend extends DefaultIRest {
                        "password VARCHAR(40)," .
                        "address VARCHAR(100)," .
                        "phone VARCHAR(20)," .
-                       "PRIMARY KEY (email));");
+                       "PRIMARY KEY (email))");
             
             $this->sql($conn,
                        "CREATE TABLE tbl_session (" .
                        "email VARCHAR(100) NOT NULL," .
-                       "session_key VARCHAR(40) NOT NULL," .
-                       "PRIMARY KEY (email, session_key));");
+                       "session_key RAW(16) DEFAULT SYS_GUID()," .
+                       "PRIMARY KEY (email, session_key)," .
+                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE CASCADE)");
             
             $this->sql($conn,
                        "CREATE TABLE tbl_group (" .
                        "gname VARCHAR(100)," .
-                       "gdesc TEXT," .
-                       "PRIMARY KEY (gname));");
+                       "gdesc VARCHAR(1000)," .
+                       "PRIMARY KEY (gname))");
             
             $this->sql($conn,
                        "CREATE TABLE tbl_user_group (" .
                        "email VARCHAR(100) NOT NULL," .
                        "gname VARCHAR(100) NOT NULL," .
                        "PRIMARY KEY (email, gname)," .
-                       "FOREIGN KEY (email) REFERENCES tbl_user," .
-                       "FOREIGN KEY (gname) REFERENCES tbl_group);");
+                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE SET NULL," .
+                       "FOREIGN KEY (gname) REFERENCES tbl_group ON DELETE SET NULL)");
 
             $this->sql($conn,
                        "CREATE TABLE tbl_catagory (" .
                        "cname VARCHAR(100)," .
-                       "PRIMARY KEY (cname));");
+                       "PRIMARY KEY (cname))");
 
             $this->sql($conn,
                        "CREATE TABLE tbl_item (" .
                        "iname VARCHAR(100) NOT NULL," .
-                       "item_id INT NOT NULL AUTO_INCREMENT," .
-                       "idesc TEXT," .
-                       "price FLOAT," .
+                       "item_id NUMBER(10)," .
+                       "idesc VARCHAR(1000)," .
+                       "price NUMBER(10, 2)," .
                        "cname VARCHAR(100) NOT NULL," .
                        "email VARCHAR(100) NOT NULL," .
-                       "post_date DATETIME," .
+                       "post_date DATE," .
                        "PRIMARY KEY (item_id)," .
-                       "FOREIGN KEY (cname) REFERENCES tbl_catagory ON DELETE NO ACTION," .
-                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE NO ACTION" .
-                       ");");
+                       "FOREIGN KEY (cname) REFERENCES tbl_catagory ON DELETE SET NULL," .
+                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE SET NULL" .
+                       ")");
 
             $this->sql($conn,
                        "CREATE TABLE tbl_photo (" .
                        "image_data BLOB," .
-                       "image_id INT NOT NULL AUTO_INCREMENT," .
-                       "item_id INT NOT NULL," .
+                       "image_id NUMBER(10)," .
+                       "item_id NUMBER(10)," .
                        "PRIMARY KEY (image_id)," .
-                       "FOREIGN KEY (item_id) REFERENCES tbl_item ON DELETE NO ACTION" .
-                       ");");
+                       "FOREIGN KEY (item_id) REFERENCES tbl_item ON DELETE SET NULL" .
+                       ")");
 
             $this->sql($conn,
                        "CREATE TABLE tbl_transaction (" .
-                       "trans_id INT NOT NULL AUTO_INCREMENT," .
-                       "date DATE," .
-                       "price FLOAT," .
+                       "trans_id NUMBER(10)," .
+                       "last_date DATE," .
+                       "price NUMBER(10,2)," .
                        "email VARCHAR(100) NOT NULL," .
-                       "item_id INT NOT NULL," .
+                       "item_id NUMBER(10) NOT NULL," .
                        "PRIMARY KEY (trans_id)," .
-                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE NO ACTION," .
-                       "FOREIGN KEY (item_id) REFERENCES tbl_item ON DELETE NO ACTION" .
-                       ");");
+                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE SET NULL," .
+                       "FOREIGN KEY (item_id) REFERENCES tbl_item ON DELETE SET NULL" .
+                       ")");
 
             $this->sql($conn,
                        "CREATE TABLE tbl_message (" .
-                       "msg_id INT NOT NULL AUTO_INCREMENT," .
-                       "date DATE," .
-                       "content TEXT," .
-                       "trans_id INT NOT NULL," .
+                       "msg_id RAW(16) DEFAULT SYS_GUID()," .
+                       "post_date DATE," .
+                       "content VARCHAR(1000)," .
+                       "trans_id NUMBER(10) NOT NULL," .
                        "PRIMARY KEY (msg_id)," .
-                       "FOREIGN KEY (trans_id) REFERENCES tbl_transaction ON DELETE NO ACTION" .
-                       ");");
+                       "FOREIGN KEY (trans_id) REFERENCES tbl_transaction ON DELETE SET NULL" .
+                       ")");
+
+            $this->sql($conn, "CREATE SEQUENCE seq_id"); 
             
         } catch (Exception $e) {
             echo $e->getMessage();
@@ -165,11 +201,11 @@ class Backend extends DefaultIRest {
     public function get($args) {
         if ($args["reset"] === "yespleasedoit") {
             if ($this->reset_db())
-                return ["result" => "success"];
-            else return ["result" => "failed"];
+                return array("result" => "success");
+            else return array("result" => "failed");
         }
 
-        return ["result" => "nothing to do"];
+        return array("result" => "nothing to do");
     }
 
     public function handleException(Exception $e) {
@@ -219,19 +255,19 @@ class ItemManager extends DefaultIRest {
                                      "INSERT INTO tbl_item (iname, idesc, price, cname, email, post_date) " .
                                      "VALUES ('$iname', '$idesc', '$price', '$cname', '$email', now());");
         } catch (Exception $e) {
-            return ["result" => "failed",
-                    "reason" => "sql error"];
+            return array("result" => "failed",
+                         "reason" => "sql error");
         }
 
         /* creation success */
-        return ["result" => "success"];
+        return array("result" => "success");
     }
 
     public function get($args) {
         /* list all items */
         if (!SessionManager::instance()->authenticate_session($args))
-            return ["result" => "failed",
-                    "reason" => "authentication failed"];
+            return array("result" => "failed",
+                         "reason" => "authentication failed");
 
         $email = $args["email"];
 

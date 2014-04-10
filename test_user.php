@@ -64,5 +64,23 @@ $r = $b->dispatch("/user/a@b.com/")->put(
 
 var_dump($r); echo "<br />";
 
+$r = $b->dispatch("/group/")->post(
+    ["gname" => "g",
+     "gdesc" => "desc"]);
+
+var_dump($r); echo "<br />";
+
+$r = $b->dispatch("/group/g/")->get(
+    []);
+
+var_dump($r); echo "<br />";
+
+$r = $b->dispatch("/group/g/")->post(
+    ["email" => "a@b.com",
+     "session_key" => $sk]);
+
+var_dump($r); echo "<br />";
+
+
 
 ?>

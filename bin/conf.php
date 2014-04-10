@@ -7,25 +7,26 @@ class Config {
             $instance = new self();
         return $instance;
     }
-
-     public $mysql_host;
-     public $mysql_username;
-     public $mysql_password;
-     public $mysql_database;
-     
-     protected function __construct() {
-         $this->mysql_host     = "www.xinhaoyuan.net";
-         $this->mysql_username = "w4111p1";
-         $this->mysql_password = "EGqy2VDest8m7m5a";
-         $this->mysql_database = "w4111p1";
-     }
-
+    
+    public $oci_username;
+    public $oci_password;
+    public $oci_connstr;
+    
+    protected function __construct() {
+        $this->oci_username = "xx2153";
+        $this->oci_password = "xinan";
+        $this->oci_connstr  = "w4111g.cs.columbia.edu:1521/adb";
+    }
+    
      public function get_db_conn() {
-         return new mysqli($this->mysql_host,
-                           $this->mysql_username,
-                           $this->mysql_password,
-                           $this->mysql_database,
-                           3306);
+         $conn = oci_connect($this->oci_username,
+                             $this->oci_password,
+                             $this->oci_connstr);
+         if (!$conn) {
+             throw new Exception(oci_error()["message"]);
+         }
+
+         return $conn;
      }
 };
 
