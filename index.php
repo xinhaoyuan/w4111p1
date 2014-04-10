@@ -76,9 +76,63 @@ if($items["result"] == "success"){
 	echo "</table>";
 }
 else{
-	echo "Something wrong happen when retrieving items" . $items["reason"];
+	echo "Something wrong happen when retrieving items: " . $items["reason"];
 }
 
 ?>
+
+<h2> My Transactions: </h2>
+<?php
+$transactions = $b->dispatch("/transaction/") -> get(
+		["email" => $email,
+		"session_key" => $sk]);
+// No sanity check
+?>
+<h3> As a buyer: </h3>
+<table border="1">
+	<tr>
+		<td>Transaction ID</td>
+		<td>Item Name</td>
+		<td>Seller</td>
+		<td>Last date</td>
+	</tr>
+<?php
+	foreach($transactions["guest_tx"] as $guest_tx){
+		$seller = $b->dispatch("/user/" . $guest_tx["email"] . "/") ->get([]);
+		$item = $b->dispatch("/item/" . $guest_tx["item_id"] . "/") ->get([]);
+		echo "<tr><td>" . 
+			"<a href=\"show_trans.php?tid=" . $guest_tx["trans_id"] . "\">"
+			. $guest_tx["trans_id"] . "</a></td><td>" .
+			"<a href=\"show_item.php?item_id=" . $guest_tx["item_id"] . "\">"
+			. $item["iname"] . "</a></td><td>" .
+			$seller["name"] . "</td><td>" .
+			$guest_tx["last_date"] . "</td></tr>";
+	}
+?>
+</table>
+
+<h3> As a Seller: </h3>
+<table border="1">
+	<tr>
+		<td>Transaction ID</td>
+		<td>Item Name</td>
+		<td>Buyer</td>
+		<td>Last date</td>
+	</tr>
+<?php
+	foreach($transactions["owner_tx"] as $owner_tx){
+		$buyer = $b->dispatch("/user/" . $owner_tx["email"] . "/") ->get([]);
+		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get([]);
+		echo "<tr><td>" . 
+			"<a href=\"show_trans.php?tid=" . $owner_tx["trans_id"] . "\">"
+			. $owner_tx["trans_id"] . "</a></td><td>" .
+			"<a href=\"show_item.php?item_id=" . $owner_tx["item_id"] . "\">"
+			. $item["iname"] . "</a></td><td>" .
+			$buyer["name"] . "</td><td>" .
+			$owner_tx["last_date"] . "</td></tr>";
+	}
+?>
+</table>
+
 </body>
 </html>
