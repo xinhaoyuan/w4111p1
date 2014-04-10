@@ -169,11 +169,77 @@ class Backend extends DefaultIRest {
                        "post_date DATE," .
                        "content   VARCHAR(1000)," .
                        "trans_id  RAW(16) NOT NULL," .
+                       "email     VARCHAR(100) NOT NULL," .
                        "PRIMARY KEY (msg_id)," .
-                       "FOREIGN KEY (trans_id) REFERENCES tbl_transaction ON DELETE SET NULL" .
+                       "FOREIGN KEY (trans_id) REFERENCES tbl_transaction ON DELETE SET NULL," .
+                       "FOREIGN KEY (email) REFERENCES tbl_user ON DELETE SET NULL" .
                        ")");
 
-            $this->sql($conn, "CREATE SEQUENCE seq_id"); 
+            $r = $this->dispatch("/group/")->post(
+                ["gname" => "g",
+                 "gdesc" => "desc"]);
+
+            var_dump($r); echo "<br />";
+            
+            $r = $this->dispatch("/user/")->post(
+                ["email" => "a@b.com",
+                 "name"  => "test",
+                 "password" => "test",
+                 "address" => "dont know",
+                 "phone" => "1284432"]);
+
+            var_dump($r); echo "<br />";
+
+            $r = $this->dispatch("/user/")->post(
+                ["email" => "b@b.com",
+                 "name"  => "test",
+                 "password" => "test",
+                 "address" => "haha",
+                 "phone" => "111"]);
+
+            var_dump($r); echo "<br />";
+
+            $r = $this->dispatch("/session/")->post(
+                ["email" => "a@b.com",
+                 "password" => "test"]);
+
+            var_dump($r); echo "<br />";
+            $sk = $r["session_key"];
+
+            $r = $this->dispatch("/session/")->post(
+                ["email" => "b@b.com",
+                 "password" => "test"]);
+
+            var_dump($r); echo "<br />";
+            $sk2 = $r["session_key"];
+
+            $r = $this->dispatch("/group/g/")->post(
+                ["email" => "a@b.com",
+                 "session_key" => $sk]);
+            var_dump($r); echo "<br />";
+
+            $r = $this->dispatch("/group/g/")->post(
+                ["email" => "b@b.com",
+                 "session_key" => $sk2]);
+            var_dump($r); echo "<br />";
+
+            $r = $this->dispatch("/item/")->post(
+                array("email" => "a@b.com",
+                      "session_key" => $sk,
+                      "iname" => "test_item",
+                      "idesc" => "this is a item for test",
+                      "price" => "9.08"));
+
+            var_dump($r); echo "<br />";
+
+            $r = $this->dispatch("/item/")->post(
+                array("email" => "b@b.com",
+                      "session_key" => $sk2,
+                      "iname" => "other test_item",
+                      "idesc" => "this is a item for test",
+                      "price" => "9.08"));
+
+            var_dump($r); echo "<br />";
             
         } catch (Exception $e) {
             echo $e->getMessage();

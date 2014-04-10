@@ -151,6 +151,21 @@ class TransactionProxy extends DefaultIRest {
                 $tx = sql_extract_assoc($r);
                 Backend::instance()->sql_close_result($r);
             }
+
+            $r = Backend::instance()->sql_for_result(
+                $conn,
+                "SELECT RAWTOHEX(msg.msg_id) AS msg_id, msg.post_date, msg.content, msg.email ".
+                "FROM tbl_message msg " .
+                "WHERE msg.trans_id = '$this->_trans_id'");
+            $msgs = [];
+            while ($msg = sql_extract_assoc($r)) {
+                array_push($msgs,
+                           array("msg_id"  => $msg["MSG_ID"],
+                                 "sender"  => $msg["EMAIL"],
+                                 "date"    => $msg["POST_DATE"],
+                                 "content" => $msg["CONTENT"]));
+            }
+            BAckend::instance()->sql_close_result($r);
         } catch (Exception $e) {
             return array("result" => "failed",
                          "reason" => "sql error");
@@ -159,7 +174,29 @@ class TransactionProxy extends DefaultIRest {
         return array("result" => "success",
                      "trans_id" => $tx["TRANS_ID"],
                      "item_id" => $tx["ITEM_ID"],
-                     "last_date" => $tx["LAST_DATE"]);
+                     "last_date" => $tx["LAST_DATE"],
+                     "messages" => $msgs);
+    }
+
+    public function post($args) {
+        if (!SessionManager::instance()->authenticate_session($args))
+            return array("result" => "failed",
+                         "reason" => "authentication failed");
+        $email = $args["email"];
+        $content = $args["content"];
+        
+        try {
+            $conn = Backend::instance()->get_db_conn();
+            $r = Backend::instance()->sql(
+                $conn,
+                "INSERT INTO tbl_message (post_date, content, trans_id, email) " .
+                "VALUES (SYSDATE, '$content', '$this->_trans_id', '$email')");
+        } catch (Exception $e) {
+            return array("result" => "failed",
+                         "reason" => "sql error");
+        }
+
+        return array("result" => "success");
     }
 };
 
