@@ -200,6 +200,24 @@ $r = $b->dispatch("/transaction/$trans_id/")->get(
 
 var_dump($r); echo "<br />";
 
+$r = $b->dispatch("/transaction/$trans_id/")->put(
+    array("email" => "a@b.com",
+          "session_key" => $sk,
+          "price" => "7.7"));
 
+var_dump($r); echo "<br />";
+
+$r = $b->dispatch("/transaction/$trans_id/")->put(
+    array("email" => "b@b.com",
+          "session_key" => $sk2,
+          "price" => "7.7"));
+
+var_dump($r); echo "<br />";
+
+$r = $b->dispatch("/transaction/$trans_id/")->get(
+    array("email" => "a@b.com",
+          "session_key" => $sk));
+
+var_dump($r); echo "<br />";
 
 ?>
