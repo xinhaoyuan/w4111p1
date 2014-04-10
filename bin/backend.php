@@ -197,6 +197,8 @@ class Backend extends DefaultIRest {
             return GroupManager::instance()->dispatch($remain);
         case "item":
             return ItemManager::instance()->dispatch($remain);
+        case "transaction":
+            return TransactionManager::instance()->dispatch($remain);
         default:
             return NULL;            
         }
