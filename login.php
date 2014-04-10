@@ -8,7 +8,7 @@ require_once "bin/backend.php";
 
 $email = refine_post("email");
 $password = refine_post("password");
-
+$logInfo = "";
 if($_SERVER["REQUEST_METHOD"] == "POST")
 {
 	// Submit the result to backend
@@ -20,10 +20,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 			);
 	// How to determine whether it success ?
 
-	$_SESSION['email'] = $email;
-	$_SESSION['session'] = $r;
-
-	header( 'Location: index.php' ) ;
+	if($r["result"] == "success"){
+		$_SESSION['email'] = $email;
+		$_SESSION['session'] = $r;
+		header( 'Location: index.php' );
+	}
+	else{
+		$logInfo = "Login failed: " . $r["reason"];
+	}
 }
 
 
@@ -45,7 +49,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 	<td> <input type="password" name="password" value="<?php echo $password;?>"> </td>
 </tr>
 </table>
-<input type="submit" name="submit">
+<input type="submit" name="submit"> <?php echo $logInfo; ?>
 </form>
 
 Not a User? <a href="register.php"> Register Now </a>

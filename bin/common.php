@@ -3,7 +3,7 @@
 
 function refine_post($data)
 {
-        $data = $_POST[$data];
+        $data = isset($_POST[$data])?$_POST[$data]:"";
         $data = trim($data);
         $data = stripslashes($data);
         $data = htmlspecialchars($data);

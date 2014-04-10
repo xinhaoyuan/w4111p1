@@ -76,6 +76,6 @@ else{
 <?php
 echo $successInfo;
 ?>
-
+Go back to </a href="login.php"> Login</a>
 </body>
 </html>

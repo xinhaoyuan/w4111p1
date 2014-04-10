@@ -1,4 +1,0 @@
-# Similar to bin/is_router
-RewriteEngine on
-RewriteRule ^bin(/.*)?$ - [F]
-RewriteRule ^rest(/.*)?$ bin/rest.php?REST_PATH=$1 [QSA,END]
