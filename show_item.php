@@ -35,6 +35,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		$changeInfo = "Profile Change Failed!" + $new_user["reason"];
 }
 
+// Retrieving the detail for this item
+$item_id = $_GET["item_id"];
+$item = $b->dispatch("/item/" . $item_id . "/")->get([]);
+// Must success, no need for sanity check?
+$item_username = $b->dispatch("/user/" .$item["email"] . "/") ->get([]);
+$photos = $item["photos"];
+
 ?>
 
 <!DOCTYPE=HTML>
@@ -60,25 +67,29 @@ We have your address and phone number on file: <br>
 </form>
 <?php echo $changeInfo; ?>
 <form method="post" action="logout.php"> <input type="submit" name="logout" value="Logout"> </form>
-<h2> Check we have for you today:</h2>
-<?php
-$items = $b->dispatch("/item/") -> get(
-		["email" => $email,
-		"session_key" => $sk]);
-if($items["result"] == "success"){
-	$items = $items["items"];
-	echo '<table border="1" > <tr> <td> Item name </td><td> Description </td><td> Category </td>
-		<td> Posted by </td> <td> Post Date</td><td></td></tr>';
-	foreach ($items as $item) {
-		$item_username = $b->dispatch("/user/" . $item["email"] . "/") ->get([]);
-		echo "<tr><td>" . $item["iname"] . "</td><td>" . $item["idesc"] . "</td><td>" . $item["cname"] . "</td><td>" . $item_username["name"] . "</td><td>" . $item["post_date"] . "</td><td> <a href=\"show_item.php?item_id=" . $item["item_id"]. "\"> More</a></td></tr>";
-	}
-	echo "</table>";
-}
-else{
-	echo "Something wrong happen when retrieving items" . $items["reason"];
-}
+<h2> Item Name:</h2>
+<?php echo $item["iname"];?>
+<h2> Item Description </h2>
+<?php echo $item["idesc"];?>
+<h2> Category </h2>
+<?php echo $item["cname"];?>
+<h2> Posted by </h2>
+<?php echo $item_username["name"];?>
+<h2> Posted Date </h2>
+<?php echo $item["post_date"];?>
 
+<h2> Pictures: </h2>
+<?php
+foreach($photos as $photo){
+	echo "<img src=\"" . $photo["image_url"] . "\" alt=\"Whoops....\" height=\"400\">\n";
+}
 ?>
+
+<h2> My Transactions: </h2>
+
 </body>
+
+
+
+
 </html>
