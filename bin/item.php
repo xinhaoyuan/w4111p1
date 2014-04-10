@@ -67,6 +67,11 @@ class ItemManager extends DefaultIRest {
                          "reason" => "authentication failed");
 
         $email = $args["email"];
+        $extra_conditions = "";
+        if (isset($args["owner_email"])) {
+            $owner_email = $args["owner_email"];
+            $extra_conditions .= " AND i.email = '$owner_email'";
+        }
 
         try {
             $conn = Backend::instance()->get_db_conn();
@@ -74,13 +79,14 @@ class ItemManager extends DefaultIRest {
                 $conn,
                 "SELECT RAWTOHEX(i.item_id) as item_id, i.iname, i.idesc, i.price, i.cname, i.email, i.post_date " .
                 "FROM tbl_item i, tbl_user_group ug2, tbl_user_group ug " .
-                "WHERE ug.email = '$email' AND ug2.gname = ug.gname AND ug2.email = i.email");
+                "WHERE ug.email = '$email' AND ug2.gname = ug.gname AND ug2.email = i.email" .
+                $extra_conditions);
         } catch (Exception $e) {
             $r = NULL;
         }
 
+        $item_arr = [];
         if ($r) {
-            $item_arr = [];
             while ($item = sql_extract_assoc($r)) {
                 array_push($item_arr,
                            array(
@@ -148,8 +154,8 @@ class ItemProxy extends DefaultIRest {
         $trans_arr = [];
         while ($trans = sql_extract_assoc($r)) {
             array_push($trans_arr,
-                       array("photo_id" => $trans["TRANS_ID"],
-                             "email" => $trans["EMAIL"],
+                       array("trans_id"  => $trans["TRANS_ID"],
+                             "email"     => $trans["EMAIL"],
                              "last_date" => $trans["LAST_DATE"])
                 );
         }
