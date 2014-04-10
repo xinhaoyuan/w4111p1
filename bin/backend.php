@@ -250,6 +250,13 @@ class Backend extends DefaultIRest {
 
             var_dump($r); echo "<br />";
 
+            $r = $this->dispatch("/transaction/")->post(
+                array("email" => "b@b.com",
+                      "session_key" => $sk2,
+                      "item_id" => $item_id1));
+
+            var_dump($r); echo "<br />";
+            $trans_id = $r["trans_id"];
             
         } catch (Exception $e) {
             echo $e->getMessage();
