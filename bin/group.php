@@ -75,7 +75,16 @@ class GroupProxy extends DefaultIRest {
             $conn = Backend::instance()->get_db_conn();
             $result = Backend::instance()->sql_for_result(
                 $conn, "SELECT * FROM tbl_group WHERE gname = '$this->_gname'");
-            $r = sql_extract_assoc($result);
+            $info = sql_extract_assoc($result);
+            Backend::instance()->sql_close_result($result);
+            $result = Backend::instance()->sql_for_result(
+                $conn,
+                "SELECT email FROM tbl_user_group WHERE " .
+                "gname = '$this->_gname'");
+            $a = [];
+            while ($e = sql_extract_assoc($result)) {
+                array_push($a, $e["EMAIL"]);
+            }
             Backend::instance()->sql_close_result($result);
         } catch (Exception $e) {
             return array("result" => "failed",
@@ -83,8 +92,9 @@ class GroupProxy extends DefaultIRest {
         }
 
         return array("result" => "success",
-                     "gname"  => $r["GNAME"],
-                     "gdesc"  => $r["GDESC"]);
+                     "gname"  => $info["GNAME"],
+                     "gdesc"  => $info["GDESC"],
+                     "members" => $a);
     }
 
     public function post($args) {
@@ -100,14 +110,14 @@ class GroupProxy extends DefaultIRest {
             try {
                 $r = Backend::instance()->sql(
                     $conn, "INSERT INTO tbl_user_group (email, gname) VALUES ".
-                    "('$email', '$gname');");
+                    "('$email', '$gname')");
             } catch (Exception $e) { }
 
-            return ["result" => "success"];
+            return array("result" => "success");
             
         } catch (Exception $e) {
-            return ["result" => "failed",
-                    "reason" => "sql error"];
+            return array("result" => "failed",
+                         "reason" => "sql error");
         }
     }
 };
