@@ -115,8 +115,10 @@ class UserProxy extends DefaultIRest {
             $to_modify = FALSE;
             foreach (["name" ,"password", "address", "phone"] as $field_name) {
                 if (isset($args[$field_name])) {
-                    $to_modify = TRUE;
+                    if ($to_modify)
+                        $sql .= ",";
                     $sql .= " $field_name = '$args[$field_name]'";
+                    $to_modify = TRUE;
                 }
             }
 

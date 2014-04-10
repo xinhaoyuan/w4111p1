@@ -61,6 +61,34 @@ class GroupManager extends DefaultIRest {
         /* creation success */
         return array("result" => "success");
     }
+
+    public function get($args) {
+        if (!SessionManager::instance()->authenticate_session($args))
+            return array("result" => "failed",
+                         "reason" => "authentication failed");
+
+        $email = $args["email"];
+        
+        try {
+            $conn = Backend::instance()->get_db_conn();
+            $r = Backend::instance()->sql_for_result(
+                $conn,
+                "SELECT ug.gname FROM tbl_user_group ug " .
+                "WHERE ug.email = '$email'");
+            $groups = [];
+            while ($ug = sql_extract_assoc($r)) {
+                array_push($groups, $ug["GNAME"]);
+            }
+            Backend::instance()->sql_close_result($r);
+        } catch (Exception $e) {
+            return array("result" => "failed",
+                         "reason" => "sql error");
+        }
+
+        return array("result" => "success",
+                     "groups" => $groups);
+                                             
+    }
 };
 
 class GroupProxy extends DefaultIRest {
