@@ -43,8 +43,9 @@ class UserManager extends DefaultIRest {
                                      "('$email', '$name', '$password', '$address', '$phone')");
         } catch (Exception $e) {
             try {
-                $r = Backend::instance()->sql_for_result($conn,
-                                                         "SELECT COUNT(*) FROM tbl_user WHERE email = '$email'");
+                $r = Backend::instance()->sql_for_result(
+                    $conn,
+                    "SELECT COUNT(*) FROM tbl_user WHERE email = '$email'");
                 $count = (int)sql_extract_row($r)[0];
                 Backend::instance()->sql_close_result($r);
             } catch (Exception $e) {

@@ -81,6 +81,9 @@ $r = $b->dispatch("/group/g/")->post(
 
 var_dump($r); echo "<br />";
 
+$r = $b->dispatch("/group/g/")->get(
+    []);
 
+var_dump($r); echo "<br />";
 
 ?>
