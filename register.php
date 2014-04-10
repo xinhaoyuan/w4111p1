@@ -3,17 +3,18 @@
 <?php
 
 require_once "bin/backend.php";
+require_once "bin/common.php";
 
-$success = 0;
+$successInfo = "";
 $email = $name = $password = $address = $phone = "";
-if (!isset($_POST["submit"]))
-	return;
 $email = refine_post("email");
 $name = refine_post("name");
 $password = refine_post("password");
 $address = refine_post("address");
 $phone = refine_post("phone");
 
+if($_SERVER["REQUEST_METHOD"] == "POST")
+{
 // Email, Name, Password NOT NULL
 if(empty($email))
 	js_alert("Your email address should not be blank");
@@ -32,23 +33,15 @@ else{
 		 "password" => $password,
 		 "address" => $address,
 		 "phone" => $phone]);
+	if($r["result"] == "success"){
+		$successInfo = "Register Success !!!";
+	}
+	else{
+		$successInfo = "Sorry..." . $r["reason"];
+	}
 }
 	
-
-function refine_post($data)
-{
-	$data = $_POST[$data];
-	$data = trim($data);
-	$data = stripslashes($data);
-	$data = htmlspecialchars($data);
-	return $data;
-} 
-function js_alert($msg){
-	echo "<script type='text/javascript'>\n";
-	echo "alert('". $msg . "');\n";
-	echo "</script>";
 }
-
 
 ?>
 
@@ -80,7 +73,9 @@ function js_alert($msg){
 </table>
 <input type="submit" name="submit">
 </form>
-
+<?php
+echo $successInfo;
+?>
 
 </body>
 </html>

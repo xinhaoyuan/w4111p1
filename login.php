@@ -1,26 +1,40 @@
 
 <?php
 
-require_once "bin/common.php";
+session_start();
 
-$success = 0;
+require_once "bin/common.php";
+require_once "bin/backend.php";
+
 $email = refine_post("email");
 $password = refine_post("password");
 
-if(!empty($email) && !empty($password))
+if($_SERVER["REQUEST_METHOD"] == "POST")
 {
 	// Submit the result to backend
-	$success = 1;
+
+	$b = Backend::instance();
+	$r = $b->dispatch("/session/")->post(
+			array("email" => $email,
+				"password" => $password)
+			);
+	// How to determine whether it success ?
+
+	$_SESSION['email'] = $email;
+	$_SESSION['session'] = $r;
+
 	header( 'Location: index.php' ) ;
 }
 
+
+?>
 
 <!DOCTYPE HTML>
 <html>
 <body>
 <h1> Welcome to Online shopping platform </h1>
 <h3> User login: </h3>
-<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<form method="post">
 <table>
 <tr>
 	<td> Email Address </td>
@@ -33,6 +47,8 @@ if(!empty($email) && !empty($password))
 </table>
 <input type="submit" name="submit">
 </form>
+
+Not a User? <a href="register.php"> Register Now </a>
 
 </body>
 </html>
