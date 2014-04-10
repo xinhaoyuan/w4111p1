@@ -220,4 +220,9 @@ $r = $b->dispatch("/transaction/$trans_id/")->get(
 
 var_dump($r); echo "<br />";
 
+$r = $b->dispatch("/item/$item_id/")->get(
+    array());
+
+var_dump($r); echo "<br />";
+
 ?>

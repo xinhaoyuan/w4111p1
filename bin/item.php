@@ -130,13 +130,27 @@ class ItemProxy extends DefaultIRest {
 
         $r = Backend::instance()->sql_for_result(
             $conn,
-            "SELECT RAWTOHEX(p.image_id)as photo_id, p.image_url FROM tbl_photo p WHERE p.item_id = '$this->_item_id'");
+            "SELECT RAWTOHEX(p.image_id) AS photo_id, p.image_url FROM tbl_photo p WHERE p.item_id = '$this->_item_id'");
 
         $photo_arr = [];
         while ($photo = sql_extract_assoc($r)) {
             array_push($photo_arr,
                        array("photo_id" => $photo["PHOTO_ID"],
                              "image_url" => $photo["IMAGE_URL"])
+                );
+        }
+        Backend::instance()->sql_close_result($r);
+
+        $r = Backend::instance()->sql_for_result(
+            $conn,
+            "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id'");
+
+        $trans_arr = [];
+        while ($trans = sql_extract_assoc($r)) {
+            array_push($trans_arr,
+                       array("photo_id" => $trans["TRANS_ID"],
+                             "email" => $trans["EMAIL"],
+                             "last_date" => $trans["LAST_DATE"])
                 );
         }
         Backend::instance()->sql_close_result($r);
@@ -148,7 +162,8 @@ class ItemProxy extends DefaultIRest {
                      "cname"  => $info["CNAME"],
                      "email"  => $info["EMAIL"],
                      "post_date" => $info["POST_DATE"],
-                     "photos" => $photo_arr);
+                     "photos" => $photo_arr,
+                     "transactions" => $trans_arr);
     }
 };
 
