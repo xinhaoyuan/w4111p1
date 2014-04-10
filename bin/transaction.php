@@ -138,7 +138,7 @@ class TransactionProxy extends DefaultIRest {
             /* test guest tx */
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.last_date, tx.price " .
+                "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.email, tx.last_date, tx.price " .
                 "FROM tbl_transaction tx WHERE " .
                 "tx.trans_id = '$this->_trans_id' AND tx.email = '$email'");
             $tx = sql_extract_assoc($r);
@@ -147,7 +147,7 @@ class TransactionProxy extends DefaultIRest {
             if (!$tx) {
                 $r = Backend::instance()->sql_for_result(
                     $conn,
-                    "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.last_date, tx.price " .
+                    "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.email, tx.last_date, tx.price " .
                     "FROM tbl_transaction tx, tbl_item i WHERE " .
                     "tx.trans_id = '$this->_trans_id' AND tx.item_id = i.item_id AND i.email = '$email'");
                 $tx = sql_extract_assoc($r);
@@ -176,6 +176,7 @@ class TransactionProxy extends DefaultIRest {
         return array("result" => "success",
                      "trans_id" => $tx["TRANS_ID"],
                      "item_id" => $tx["ITEM_ID"],
+                     "email" => $tx["EMAIL"],
                      "last_date" => $tx["LAST_DATE"],
                      "price" => $tx["PRICE"],
                      "messages" => $msgs);

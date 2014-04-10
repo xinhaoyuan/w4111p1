@@ -183,7 +183,7 @@ class Backend extends DefaultIRest {
             
             $r = $this->dispatch("/user/")->post(
                 ["email" => "a@b.com",
-                 "name"  => "test",
+                 "name"  => "test_a",
                  "password" => "test",
                  "address" => "dont know",
                  "phone" => "1284432"]);
@@ -192,7 +192,7 @@ class Backend extends DefaultIRest {
 
             $r = $this->dispatch("/user/")->post(
                 ["email" => "b@b.com",
-                 "name"  => "test",
+                 "name"  => "test_b",
                  "password" => "test",
                  "address" => "haha",
                  "phone" => "111"]);
