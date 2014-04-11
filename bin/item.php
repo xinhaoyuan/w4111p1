@@ -77,7 +77,7 @@ class ItemManager extends DefaultIRest {
             $conn = Backend::instance()->get_db_conn();
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(i.item_id) as item_id, i.iname, i.idesc, i.price, i.cname, i.email, i.post_date " .
+                "SELECT DISTINCT RAWTOHEX(i.item_id) as item_id, i.iname, i.idesc, i.price, i.cname, i.email, i.post_date " .
                 "FROM tbl_item i, tbl_user_group ug2, tbl_user_group ug " .
                 "WHERE ug.email = '$email' AND ug2.gname = ug.gname AND ug2.email = i.email" .
                 $extra_conditions .
