@@ -118,11 +118,11 @@ $messages = $transaction["messages"];
           </div>
           <div class="col-md-4">
             <h3>Owner</h3>
-            <p><?=$owner["name"]?></p>
+            <p><a href="show_user.php?email=<?=$owner["email"]?>"><?=$owner["name"]?></a></p>
           </div>
           <div class="col-md-4">
             <h3>Buyer</h3>
-            <p><?=$buyer["name"]?></p>
+            <p><a href="show_user.php?email=<?=$buyer["email"]?>"><?=$buyer["name"]?></a></p>
           </div>
         </div>
         <!-- Example row of columns -->
