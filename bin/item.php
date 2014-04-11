@@ -80,7 +80,8 @@ class ItemManager extends DefaultIRest {
                 "SELECT RAWTOHEX(i.item_id) as item_id, i.iname, i.idesc, i.price, i.cname, i.email, i.post_date " .
                 "FROM tbl_item i, tbl_user_group ug2, tbl_user_group ug " .
                 "WHERE ug.email = '$email' AND ug2.gname = ug.gname AND ug2.email = i.email" .
-                $extra_conditions);
+                $extra_conditions .
+                " ORDER BY i.post_date DESC");
         } catch (Exception $e) {
             $r = NULL;
         }
@@ -157,13 +158,13 @@ class ItemProxy extends DefaultIRest {
             /* owner */
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id'");
+                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id' ORDER BY t.last_date DESC");
         } else {
             /* guest */
             $r = Backend::instance()->sql_for_result(
                 $conn,
                 "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t " .
-                "WHERE t.item_id = '$this->_item_id' AND t.email = '$email'");
+                "WHERE t.item_id = '$this->_item_id' AND t.email = '$email' ORDER BY t.last_date DESC");
         }
 
         $trans_arr = [];

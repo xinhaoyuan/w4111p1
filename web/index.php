@@ -91,7 +91,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     <div class="container theme-showcase" role="main">
 
-      <h1>Dashboards</h1>
+      <h1>Dashboard</h1>
+      
+      <div class="page-header">
+        <a href="post_item.php" class="btn btn-primary btn-md" role="button">Post New Item</a>
+      </div>
 
       <div class="page-header">
         <h2>Recent Items</h2>
@@ -196,7 +200,7 @@ if($items["result"] == "success"){
 		$item = $b->dispatch("/item/" . $guest_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
       <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><span style="color: darkblue">You</span></td>
-        <td><?=$seller["name"]?></td><td><?=$guest_tx["last_date"]?></td><td><a href="show_transaction.php" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
+        <td><?=$seller["name"]?></td><td><?=$guest_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$guest_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
 <?php } ?>
 <?php
    foreach($trans["owner_tx"] as $owner_tx){
@@ -204,7 +208,7 @@ if($items["result"] == "success"){
 		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
       <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$buyer["name"]?></td>
-        <td><span style="color: darkblue">You</span></td><td><?=$owner_tx["last_date"]?></td><td><a href="show_transaction.php" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
+        <td><span style="color: darkblue">You</span></td><td><?=$owner_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$owner_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
 <?php } ?>
 
       <tbody>
