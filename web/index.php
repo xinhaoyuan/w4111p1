@@ -83,6 +83,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
+            <li><a href="show_user.php?email=<?=$email?>">My Profile</a></li>
+          </ul>
+          <ul class="nav navbar-nav">
             <li><a href="logout.php">Logout</a></li>
           </ul>
         </div><!--/.nav-collapse -->

@@ -15,8 +15,30 @@ $sk = $r['session_key'];
 
 // Retrieving the detail for this user
 $useremail = $_GET["email"];
-$user = $b->dispatch("/user/" . $email . "/")->get([]);
-
+if($useremail != $email)
+	$user = $b->dispatch("/user/" . $email . "/")->get([]);
+else
+	$user = $b->dispatch("/user/" . $email . "/")->get(
+		["email" => $email,
+		"session_key" => $sk]);
+if(isset($_GET['new_address'])){
+	$new_address = $_GET['new_address'];
+	$user = $b->dispatch("/user/" . $email . "/")->put(
+			["email" => $email,
+			"session_key" => $sk,
+			"address" => $new_address,
+			"phone" => $user["phone"]]);
+	header("Location: show_user.php?email=$email");
+}
+if(isset($_GET['new_phone'])){
+	$new_phone = $_GET['new_phone'];
+	$user = $b->dispatch("/user/" . $email . "/")->put(
+			["email" => $email,
+			"session_key" => $sk,
+			"address" => $user["address"],
+			"phone" => $new_phone]);
+	header("Location: show_user.php?email=$email");
+}
 // Must success, no need for sanity check?
 
 ?>
@@ -87,6 +109,38 @@ $user = $b->dispatch("/user/" . $email . "/")->get([]);
         <div class="panel-body">
           <?=$user["email"]?>
         </div>
+		<?php
+			if($useremail == $email){
+				?>
+        <div class="panel-heading">
+          <h3 class="panel-title">Address <button onclick="change_address()">Change</button></h3>
+        </div>
+        <div class="panel-body">
+          <?=$user["address"]?>
+        </div>
+        <div class="panel-heading">
+          <h3 class="panel-title">Phone number <button onclick="change_phone()">Change</button></h3>
+        </div>
+        <div class="panel-body">
+          <?=$user["phone"]?>
+        </div>
+		
+		<script>
+			function change_address(){
+				var address = prompt("Enter your new address","On the earth?");
+				if (address != null)
+					window.location.href = document.URL + "&new_address=" + address;
+			}
+			function change_phone(){
+				var phone = prompt("Enter your new phone number","911");
+				if (phone != null)
+					window.location.href = document.URL + "&new_phone=" + phone;
+			}
+		</script>
+
+		<?php
+			}
+?>
       </div>
 <div class="page-header">
   <h2>His/Her Items</h2>
