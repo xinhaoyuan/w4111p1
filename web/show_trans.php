@@ -8,7 +8,7 @@ if(!isset($_SESSION['email'])){
 	header( "Location: login.php" );
 
 }
-
+$sendInfo="";
 $b = Backend::instance();
 $email = $_SESSION['email'];
 $r = $_SESSION['session'];

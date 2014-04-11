@@ -153,7 +153,7 @@ class ItemProxy extends DefaultIRest {
         }
         Backend::instance()->sql_close_result($r);
 
-        if ($email === $info["email"]) {
+        if ($email === $info["EMAIL"]) {
             /* owner */
             $r = Backend::instance()->sql_for_result(
                 $conn,
