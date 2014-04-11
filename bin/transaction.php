@@ -82,7 +82,8 @@ class TransactionManager extends DefaultIRest {
                 $conn,
                 "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, i.email, tx.last_date ".
                 "FROM tbl_transaction tx, tbl_item i WHERE " .
-                "tx.email = '$email' AND i.item_id = tx.item_id");
+                "tx.email = '$email' AND i.item_id = tx.item_id " .
+                "ORDER BY tx.last_date DESC");
             $gtx = [];
             while ($tx = sql_extract_assoc($r)) {
                 array_push($gtx, array(
@@ -97,7 +98,8 @@ class TransactionManager extends DefaultIRest {
                 $conn,
                 "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.email, tx.last_date " .
                 "FROM tbl_transaction tx, tbl_item i WHERE " .
-                "tx.item_id = i.item_id AND i.email = '$email'");
+                "tx.item_id = i.item_id AND i.email = '$email' " .
+                "ORDER BY tx.last_date DESC");
             $otx = [];
             while ($tx = sql_extract_assoc($r)) {
                 array_push($otx, array(
@@ -158,7 +160,8 @@ class TransactionProxy extends DefaultIRest {
                 $conn,
                 "SELECT RAWTOHEX(msg.msg_id) AS msg_id, msg.post_date, msg.content, msg.email ".
                 "FROM tbl_message msg " .
-                "WHERE msg.trans_id = '$this->_trans_id'");
+                "WHERE msg.trans_id = '$this->_trans_id' " .
+                "ORDER BY msg.post_date DESC");
             $msgs = [];
             while ($msg = sql_extract_assoc($r)) {
                 array_push($msgs,
