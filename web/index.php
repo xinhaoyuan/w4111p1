@@ -188,6 +188,7 @@ if($items["result"] == "success"){
         <th>Name</th>
         <th>Description</th>
         <th>Price</th>
+        <th>Catagory</th>
         <th>Post date</th>
       </tr>
     </thead>
@@ -196,7 +197,7 @@ if($items["result"] == "success"){
          $items = $items["items"];
          foreach ($items as $item) {
       ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?=$item["post_date"]?></td></tr>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?php if ($item["cname"] != NULL) echo $item["cname"]; ?></td><td><?=$item["post_date"]?></td></tr>
       <?php
          }
          ?>
@@ -244,7 +245,7 @@ if($items["result"] == "success"){
 		$buyer = $b->dispatch("/user/" . $owner_tx["email"] . "/") ->get([]);
 		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><a href="show_user.php?email=<?=$owner_tx["email"]?>"><?=$buyer["name"]?></td>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><a href="show_user.php?email=<?=$owner_tx["email"]?>"><?=$buyer["name"]?></a></td>
         <td><span style="color: darkblue">You</span></td><td><?=$owner_tx["price"]?></td><td><?=$owner_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$owner_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
 <?php } ?>
 
