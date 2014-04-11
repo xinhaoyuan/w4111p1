@@ -96,6 +96,7 @@ class ItemManager extends DefaultIRest {
                                "idesc"   => $item["IDESC"],
                                "cname"   => $item["CNAME"],
                                "email"   => $item["EMAIL"],
+                               "price"   => $item["PRICE"],
                                "post_date" => $item["POST_DATE"]));
             }
             Backend::instance()->sql_close_result($r);
@@ -123,6 +124,7 @@ class ItemProxy extends DefaultIRest {
     }
 
     public function get($args) {
+        /* get single item */
         if (!SessionManager::instance()->authenticate_session($args))
             return array("result" => "failed",
                          "reason" => "authentication failed");
@@ -182,6 +184,7 @@ class ItemProxy extends DefaultIRest {
                      "iname"  => $info["INAME"],
                      "idesc"  => $info["IDESC"],
                      "cname"  => $info["CNAME"],
+                     "price"  => $info["PRICE"],
                      "email"  => $info["EMAIL"],
                      "post_date" => $info["POST_DATE"],
                      "photos" => $photo_arr,

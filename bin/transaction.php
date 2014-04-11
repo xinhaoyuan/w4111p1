@@ -80,7 +80,7 @@ class TransactionManager extends DefaultIRest {
 
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, i.email, tx.last_date ".
+                "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, i.email, tx.last_date, tx.price ".
                 "FROM tbl_transaction tx, tbl_item i WHERE " .
                 "tx.email = '$email' AND i.item_id = tx.item_id " .
                 "ORDER BY tx.last_date DESC");
@@ -90,13 +90,14 @@ class TransactionManager extends DefaultIRest {
                                "trans_id"  => $tx["TRANS_ID"],
                                "item_id"   => $tx["ITEM_ID"],
                                "email"     => $tx["EMAIL"],
+                               "price"     => $tx["PRICE"],
                                "last_date" => $tx["LAST_DATE"]));
             }
             Backend::instance()->sql_close_result($r);
 
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.email, tx.last_date " .
+                "SELECT RAWTOHEX(tx.trans_id) as trans_id, RAWTOHEX(tx.item_id) as item_id, tx.email, tx.last_date, tx.price " .
                 "FROM tbl_transaction tx, tbl_item i WHERE " .
                 "tx.item_id = i.item_id AND i.email = '$email' " .
                 "ORDER BY tx.last_date DESC");
@@ -106,6 +107,7 @@ class TransactionManager extends DefaultIRest {
                                "trans_id"  => $tx["TRANS_ID"],
                                "item_id"   => $tx["ITEM_ID"],
                                "email"     => $tx["EMAIL"],
+                               "price"     => $tx["PRICE"],
                                "last_date" => $tx["LAST_DATE"]));
             }
             Backend::instance()->sql_close_result($r);

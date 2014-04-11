@@ -111,6 +111,13 @@ $photos = $item["photos"];
         </div>
 
         <div class="panel-heading">
+          <h3 class="panel-title">Price</h3>
+        </div>
+        <div class="panel-body">
+          <?=$item["price"]?>
+        </div>
+
+        <div class="panel-heading">
           <h3 class="panel-title">Photos</h3>
         </div>
         <div class="panel-body">
