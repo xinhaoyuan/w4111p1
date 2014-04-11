@@ -34,6 +34,7 @@ class TransactionManager extends DefaultIRest {
         
         $item_id = $args["item_id"];
         $email   = $args["email"];
+        $price   = $args["price"];
 
         try {
             $conn = Backend::instance()->get_db_conn();
@@ -56,7 +57,7 @@ class TransactionManager extends DefaultIRest {
             $st = oci_parse(
                 $conn,
                 "INSERT INTO tbl_transaction (last_date, price, email, item_id) VALUES " .
-                "(SYSDATE, 0.00, '$email', '$item_id') RETURNING trans_id INTO :id");
+                "(SYSDATE, $price, '$email', '$item_id') RETURNING trans_id INTO :id");
             oci_bind_by_name($st, ":id", $id, 32);
             oci_execute($st);
             oci_free_statement($st);
