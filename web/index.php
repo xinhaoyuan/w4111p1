@@ -94,7 +94,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
       <h1>Dashboard</h1>
       
       <div class="page-header">
-        <a href="../add_item.php" class="btn btn-primary btn-md" role="button">Post New Item</a>
+        <a href="add_item.php" class="btn btn-primary btn-md" role="button">Post New Item</a>
         <a href="list_groups.php" class="btn btn-primary btn-md" role="button">Discover Groups</a>
       </div>
 
