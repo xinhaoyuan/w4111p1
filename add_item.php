@@ -19,9 +19,10 @@ $iname = refine_post("iname");
 $idesc = refine_post("idesc");
 $price = refine_post("price");
 $cname = refine_post("cname");
+$photo_url = refine_post("photo_url");
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
-	$result = $b->dispatch("/item/") -> get([
+	$result = $b->dispatch("/item/") -> post([
 			"iname" => $iname,
 			"idesc" => $idesc,
 			"price" => $price,
@@ -29,7 +30,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			"email" => $email,
 			"session_key" => $sk]);
 	if($result["result"] == "success"){
-		$postInfo = "Post Item success!";
+		if(!empty($photo_url)){
+			$result = $b->dispatch("/item/" . $result["item_id"] . "/photo/")->post([
+					"image_url" => $photo_url]);
+			if($result["result"] == "success")
+				$postInfo = "Post Item success!";
+			else
+				$postInfo = "Failure" . $result["reason"];
+		}
+		else{
+			$postInfo = "Post Item success!";
+		}
 	}
 	else{
 		$postInfo = "Failure" . $result["reason"];
@@ -63,6 +74,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			<option value="Misc">Misc</option>
 		</select>
 	</td>
+</tr>
+<tr>
+	<td>Photo URL:</td>
+	<td> <input type="text" name="photo_url"> </td>
 </tr>
 </table>
 <td> <input type="submit" name="new_item" value="Post Item"> </td>
