@@ -193,7 +193,7 @@ if($items["result"] == "success"){
 <?php
    foreach($trans["guest_tx"] as $guest_tx){
 		$seller = $b->dispatch("/user/" . $guest_tx["email"] . "/") ->get([]);
-		$item = $b->dispatch("/item/" . $guest_tx["item_id"] . "/") ->get([]);
+		$item = $b->dispatch("/item/" . $guest_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
       <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><span style="color: darkblue">You</span></td>
         <td><?=$seller["name"]?></td><td><?=$guest_tx["last_date"]?></td><td><a href="show_transaction.php" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
@@ -201,7 +201,7 @@ if($items["result"] == "success"){
 <?php
    foreach($trans["owner_tx"] as $owner_tx){
 		$buyer = $b->dispatch("/user/" . $owner_tx["email"] . "/") ->get([]);
-		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get([]);
+		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
       <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$buyer["name"]?></td>
         <td><span style="color: darkblue">You</span></td><td><?=$owner_tx["last_date"]?></td><td><a href="show_transaction.php" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>

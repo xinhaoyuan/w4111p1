@@ -138,7 +138,8 @@ var_dump($r); echo "<br />";
 $item_id = $r["items"][0]["item_id"];
 
 $r = $b->dispatch("/item/$item_id/")->get(
-    array());
+    array("email" => "a@b.com",
+          "session_key" => $sk));
 
 var_dump($r); echo "<br />";
 
@@ -148,7 +149,8 @@ $r = $b->dispatch("/item/$item_id/photo/")->post(
 var_dump($r); echo "<br />";
 
 $r = $b->dispatch("/item/$item_id/")->get(
-    array());
+    array("email" => "a@b.com",
+          "session_key" => $sk));
 
 var_dump($r); echo "<br />";
 

@@ -122,6 +122,12 @@ class ItemProxy extends DefaultIRest {
     }
 
     public function get($args) {
+        if (!SessionManager::instance()->authenticate_session($args))
+            return array("result" => "failed",
+                         "reason" => "authentication failed");
+
+        $email = $args["email"];
+        
         $conn = Backend::instance()->get_db_conn();
         $r = Backend::instance()->sql_for_result(
             $conn,
@@ -147,9 +153,18 @@ class ItemProxy extends DefaultIRest {
         }
         Backend::instance()->sql_close_result($r);
 
-        $r = Backend::instance()->sql_for_result(
-            $conn,
-            "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id'");
+        if ($email === $info["email"]) {
+            /* owner */
+            $r = Backend::instance()->sql_for_result(
+                $conn,
+                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id'");
+        } else {
+            /* guest */
+            $r = Backend::instance()->sql_for_result(
+                $conn,
+                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t " .
+                "WHERE t.item_id = '$this->_item_id' AND t.email = '$email'");
+        }
 
         $trans_arr = [];
         while ($trans = sql_extract_assoc($r)) {
