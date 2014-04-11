@@ -73,6 +73,17 @@ class ItemManager extends DefaultIRest {
             $extra_conditions .= " AND i.email = '$owner_email'";
         }
 
+        if (isset($args["keyword"])) {
+            $keyword = $args["keyword"];
+            $extra_conditions .= " AND (i.iname LIKE '%$keyword%' OR i.idesc LIKE '%$keyword%')";
+        }
+
+        if (isset($args["cname"])) {
+            $cname = $args["cname"];
+            $extra_conditions .= " AND i.cname = '$cname'";
+        }
+
+
         try {
             $conn = Backend::instance()->get_db_conn();
             $r = Backend::instance()->sql_for_result(
