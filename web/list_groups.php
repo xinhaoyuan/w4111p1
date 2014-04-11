@@ -95,13 +95,14 @@ if ($action === "join") {
 
       <div>
         <form method="get">
-          <table align="center">
-            <tr>
-	          <td style="padding-right: 10px"><input type="text" name="keyword" value=""></td>
-              <input type="hidden" name="action" value="search"/>
-              <td><input type="submit" name="submit" value="Search" class="btn btn-sm btn-primary"></td>
-            </tr><tr style="height: 5px">
-          </table>
+<input type="hidden" name="action" value="search"/>
+<div class="input-group">
+  <span class="input-group-addon">Search</span>
+  <input type="text" name="keyword" class="form-control" placeholder="Any keyword to search ...">
+  <span class="input-group-btn">
+    <button class="btn btn-default" type="submit">Go!</button>
+  </span>
+</div>
         </form>
 
       </div>

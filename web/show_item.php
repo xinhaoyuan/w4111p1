@@ -143,9 +143,36 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <?php } ?>
         </div>
 
+        <?php if ($item["email"] === $email && count($item["transactions"]) > 0) { ?>
+        <div class="panel-heading">
+          <h3 class="panel-title">Buying Transaction</h3>
+        </div>
+        <div class="panel-body">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Seller</th>
+                <th>Price</th>
+                <th>Last Updated</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach($item["transactions"] as $tx) {
+		            $buyer = $b->dispatch("/user/" . $tx["email"] . "/") ->get([]);
+              ?>
+              <tr><td><a href="show_user.php?email=<?=$tx["email"]?>"><?=$buyer["name"]?></a></td>
+                <td><span style="color: darkblue">You</span></td><td><?=$tx["price"]?></td><td><?=$tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
+              <?php } ?>
+            </tbody>
+          </table>
+          <?php } ?>
+          
+        </div>
+        
+        <?php show_actions() ?>
       </div>
-
-      <?php show_actions() ?>
     </div>
   </body>
 </html>

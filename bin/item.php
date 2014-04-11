@@ -73,6 +73,17 @@ class ItemManager extends DefaultIRest {
             $extra_conditions .= " AND i.email = '$owner_email'";
         }
 
+        if (isset($args["keyword"])) {
+            $keyword = $args["keyword"];
+            $extra_conditions .= " AND (i.iname LIKE '%$keyword%' OR i.idesc LIKE '%$keyword%')";
+        }
+
+        if (isset($args["cname"])) {
+            $cname = $args["cname"];
+            $extra_conditions .= " AND i.cname = '$cname'";
+        }
+
+
         try {
             $conn = Backend::instance()->get_db_conn();
             $r = Backend::instance()->sql_for_result(
@@ -160,12 +171,12 @@ class ItemProxy extends DefaultIRest {
             /* owner */
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id' ORDER BY t.last_date DESC");
+                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.price, t.email, t.last_date FROM tbl_transaction t WHERE t.item_id = '$this->_item_id' ORDER BY t.last_date DESC");
         } else {
             /* guest */
             $r = Backend::instance()->sql_for_result(
                 $conn,
-                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.email, t.last_date FROM tbl_transaction t " .
+                "SELECT RAWTOHEX(t.trans_id) AS trans_id, t.price, t.email, t.last_date FROM tbl_transaction t " .
                 "WHERE t.item_id = '$this->_item_id' AND t.email = '$email' ORDER BY t.last_date DESC");
         }
 
@@ -174,6 +185,7 @@ class ItemProxy extends DefaultIRest {
             array_push($trans_arr,
                        array("trans_id"  => $trans["TRANS_ID"],
                              "email"     => $trans["EMAIL"],
+                             "price"     => $trans["PRICE"],
                              "last_date" => $trans["LAST_DATE"])
                 );
         }

@@ -18,7 +18,18 @@ $user = $b->dispatch("/user/" . $email . "/")->get(
 		["email" => $email,
 		"session_key" => $sk]);
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
+$action = $_REQUEST["action"];
+if ($action === "search") {
+    $keyword  = $_REQUEST["keyword"];
+    $catagory = $_REQUEST["catagory"];
+    $args = ["email" => $email,
+             "session_key" => $sk,
+             "keyword" => $keyword];
+    if ($catagory != "All")
+        $args["cname"] = $catagory;
+    $items = $b->dispatch("/item/")->get($args);
+    $msg = "Search result for keyword \"$keyword\" in catagory \"$catagory\"";
+} else if ($_SERVER["REQUEST_METHOD"] == "POST"){
 	$new_address = refine_post("new_address");
 	$new_phone = refine_post("new_phone");
 	$new_user = $b->dispatch("/user/" . $email . "/")->put(
@@ -34,6 +45,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	}
 	else
 		$changeInfo = "Profile Change Failed!" + $new_user["reason"];
+} else {
+    $items = $b->dispatch("/item/") -> get(
+        ["email" => $email,
+         "session_key" => $sk]);
 }
 
 ?>
@@ -105,10 +120,27 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         <h2>Recent Items</h2>
       </div>
 
+        <form method="get">
+<input type="hidden" name="action" value="search"/>
+<div class="input-group">
+  <span class="input-group-addon">Catagory</span>
+  <select name="catagory" class="form-control" width="100px">
+    <option>All</option>
+    <option>Electronics</option>
+    <option>Books</option>
+    <option>Misc</option>
+  </select>
+  <span class="input-group-addon">Search</span>
+  <input type="text" name="keyword" class="form-control" placeholder="Any keyword to search ...">
+  <span class="input-group-btn">
+    <button class="btn btn-default" type="submit">Go!</button>
+  </span>
+</div>
+        </form>
+
+<?php if (isset($msg)) { ?><p><?=$msg?></p><?php } ?>
+
 <?php
-$items = $b->dispatch("/item/") -> get(
-	["email" => $email,
-	"session_key" => $sk]);
 if($items["result"] == "success"){
 ?>
 <div class="table-responsive">
@@ -119,6 +151,7 @@ if($items["result"] == "success"){
         <th>Description</th>
         <th>Price</th>
         <th>Seller</th>
+        <th>Catagory</th>
         <th>Post date</th>
       </tr>
     </thead>
@@ -128,7 +161,7 @@ if($items["result"] == "success"){
    foreach ($items as $item) {
    $item_username = $b->dispatch("/user/" . $item["email"] . "/") ->get([]);
 ?>
-<tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><a href="show_user.php?email=<?=$item["email"]?>"><?=$item_username["name"]?></a></td><td><?=$item["post_date"]?></td></tr>
+<tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><a href="show_user.php?email=<?=$item["email"]?>"><?=$item_username["name"]?></a></td><td><?php if ($item["cname"] != NULL) echo $item["cname"]; ?></td><td><?=$item["post_date"]?></td></tr>
 <?php
    }
 ?>
@@ -158,6 +191,7 @@ if($items["result"] == "success"){
         <th>Name</th>
         <th>Description</th>
         <th>Price</th>
+        <th>Catagory</th>
         <th>Post date</th>
       </tr>
     </thead>
@@ -166,7 +200,7 @@ if($items["result"] == "success"){
          $items = $items["items"];
          foreach ($items as $item) {
       ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?=$item["post_date"]?></td></tr>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?php if ($item["cname"] != NULL) echo $item["cname"]; ?></td><td><?=$item["post_date"]?></td></tr>
       <?php
          }
          ?>
@@ -214,7 +248,7 @@ if($items["result"] == "success"){
 		$buyer = $b->dispatch("/user/" . $owner_tx["email"] . "/") ->get([]);
 		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><a href="show_user.php?email=<?=$owner_tx["email"]?>"><?=$buyer["name"]?></td>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><a href="show_user.php?email=<?=$owner_tx["email"]?>"><?=$buyer["name"]?></a></td>
         <td><span style="color: darkblue">You</span></td><td><?=$owner_tx["price"]?></td><td><?=$owner_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$owner_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
 <?php } ?>
 
