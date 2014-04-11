@@ -37,7 +37,7 @@ $photos = $item["photos"];
     Buy this item
   </a>
   <?php } else { ?>
-  You already have transaction on this item. <a href="show_transaction.php" class="btn btn-primary btn-xs" role="button">View</a>
+  You already have transaction on this item. <a href="show_trans.php?tid=<?=$item["transactions"][0]["trans_id"]?>" class="btn btn-primary btn-xs" role="button">View</a>
   <?php } ?>
 </p>
 <?php } } ?>

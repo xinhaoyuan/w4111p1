@@ -195,6 +195,10 @@ class TransactionProxy extends DefaultIRest {
                 $conn,
                 "INSERT INTO tbl_message (post_date, content, trans_id, email) " .
                 "VALUES (SYSDATE, '$content', '$this->_trans_id', '$email')");
+            $r = Backend::instance()->sql(
+                $conn,
+                "UPDATE tbl_transaction tx SET last_date = SYSDATE " .
+                "WHERE tx.trans_id = '$this->_trans_id'");
         } catch (Exception $e) {
             return array("result" => "failed",
                          "reason" => "sql error");
@@ -227,7 +231,7 @@ class TransactionProxy extends DefaultIRest {
 
             $r = Backend::instance()->sql(
                 $conn,
-                "UPDATE tbl_transaction tx SET price = $price " .
+                "UPDATE tbl_transaction tx SET price = $price, last_date = SYSDATE " .
                 "WHERE tx.trans_id = '$this->_trans_id' AND tx.email = '$email'");
         } catch (Exception $e) {
             return array("result" => "failed",

@@ -20,7 +20,7 @@ $user = $b->dispatch("/user/" . $email . "/")->get(
 $trans_id = $_GET["tid"];
 $transaction = $b->dispatch("/transaction/" . $trans_id . "/")->get(
 		["email" => $email,
-		"session_key" => $sk]);
+         "session_key" => $sk]);
 
 // Send message
 $content = refine_post("content");
@@ -43,7 +43,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 }
 
 // Must success, no need for sanity check?
-$item = $b->dispatch("/item/" .$transaction["item_id"] . "/") ->get([]);
+$item = $b->dispatch("/item/" .$transaction["item_id"] . "/") ->get(["email" => $email, "session_key" => $sk]);
 $owner = $b->dispatch("/user/" .$item["email"]."/")->get([]);
 $buyer = $b->dispatch("/user/" . $transaction["email"]."/")->get([]);
 $messages = $transaction["messages"];
