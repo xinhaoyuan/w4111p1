@@ -106,6 +106,7 @@ if($items["result"] == "success"){
         <th>Name</th>
         <th>Description</th>
         <th>Price</th>
+        <th>Catagoty</th>
         <th>Post date</th>
       </tr>
     </thead>
@@ -114,7 +115,7 @@ if($items["result"] == "success"){
          $items = $items["items"];
          foreach ($items as $item) {
       ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?=$item["post_date"]?></td></tr>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?php if ($item["cname"] != NULL) echo $item["cname"]; ?></td><td><?=$item["post_date"]?></td></tr>
       <?php
          }
          ?>
