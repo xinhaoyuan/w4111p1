@@ -16,7 +16,7 @@ $email = $_SESSION['email'];
 $r = $_SESSION['session'];
 $sk = $r['session_key'];
 
-$action = $_REQUEST["action"];
+$action = isset($_REQUEST["action"]) ? $_REQUEST["action"] : "";
 if ($action === "join") {
     $gname = $_REQUEST["gname"];
     $r = $b->dispatch("/group/$gname")->post(
