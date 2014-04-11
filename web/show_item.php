@@ -33,9 +33,6 @@ $photos = $item["photos"];
       if ($item["email"] != $email) { ?>
 <p style="text-align: center">
   <?php if (count($item["transactions"]) == 0) { ?>
-  <a href="show_transaction.php" class="btn btn-primary btn-xs" role="button">
-    Buy this item
-  </a>
   <?php } else { ?>
   You already have transaction on this item. <a href="show_trans.php?tid=<?=$item["transactions"][0]["trans_id"]?>" class="btn btn-primary btn-xs" role="button">View</a>
   <?php } ?>
@@ -115,6 +112,9 @@ $photos = $item["photos"];
         </div>
         <div class="panel-body">
           <?=$item["price"]?>
+<?php if ($item["email"] != $email && count($item["transactions"]) === 0) { ?>
+BBBBBBBBBBBBUUUUUUUUYYYYYYYYY
+<?php } ?>
         </div>
 
         <div class="panel-heading">
