@@ -124,7 +124,7 @@ if($items["result"] == "success"){
    foreach ($items as $item) {
    $item_username = $b->dispatch("/user/" . $item["email"] . "/") ->get([]);
 ?>
-<tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?=$item_username["name"]?></td><td><?=$item["post_date"]?></td></tr>
+<tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><a href="show_user.php?email=<?=$item["email"]?>"><?=$item_username["name"]?></a></td><td><?=$item["post_date"]?></td></tr>
 <?php
    }
 ?>
@@ -162,7 +162,7 @@ if($items["result"] == "success"){
          $items = $items["items"];
          foreach ($items as $item) {
       ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item_username["name"]?></td><td><?=$item["price"]?></td><td><?=$item["post_date"]?></td></tr>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$item["idesc"]?></td><td><?=$item["price"]?></td><td><?=$item["post_date"]?></td></tr>
       <?php
          }
          ?>
@@ -203,14 +203,14 @@ if($items["result"] == "success"){
 		$item = $b->dispatch("/item/" . $guest_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
       <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><span style="color: darkblue">You</span></td>
-        <td><?=$seller["name"]?></td><td><?=$guest_tx["price"]?></td><td><?=$guest_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$guest_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
+        <td><a href="show_user.php?email=<?=$guest_tx["email"]?>"><?=$seller["name"]?></a></td><td><?=$guest_tx["price"]?></td><td><?=$guest_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$guest_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
 <?php } ?>
 <?php
    foreach($trans["owner_tx"] as $owner_tx){
 		$buyer = $b->dispatch("/user/" . $owner_tx["email"] . "/") ->get([]);
 		$item = $b->dispatch("/item/" . $owner_tx["item_id"] . "/") ->get(["email" => "$email", "session_key" => $sk]);
 ?>
-      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><?=$buyer["name"]?></td>
+      <tr><td><a href="show_item.php?item_id=<?=$item["item_id"]?>"><?=$item["iname"]?></a></td><td><a href="show_user.php?email=<?=$owner_tx["email"]?>"><?=$buyer["name"]?></td>
         <td><span style="color: darkblue">You</span></td><td><?=$owner_tx["price"]?></td><td><?=$owner_tx["last_date"]?></td><td><a href="show_trans.php?tid=<?=$owner_tx["trans_id"]?>" class="btn btn-primary btn-xs" role="button">detail</a></td></tr>
 <?php } ?>
 
