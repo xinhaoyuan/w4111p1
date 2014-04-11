@@ -18,7 +18,7 @@ $user = $b->dispatch("/user/" . $email . "/")->get(
 		["email" => $email,
 		"session_key" => $sk]);
 
-$action = $_REQUEST["action"];
+$action = isset($_REQUEST["action"])? $_REQUEST["action"] : "";
 if ($action === "search") {
     $keyword  = $_REQUEST["keyword"];
     $catagory = $_REQUEST["catagory"];
