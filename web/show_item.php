@@ -6,9 +6,9 @@ require_once "../bin/common.php";
 
 if(!isset($_SESSION['email'])){
 	header( "Location: login.php" );
-
 }
-$changeInfo = "";
+
+$buyInfo = "";
 $b = Backend::instance();
 $email = $_SESSION['email'];
 $r = $_SESSION['session'];
@@ -25,6 +25,21 @@ $item = $b->dispatch("/item/" . $item_id . "/")->get([
 // Must success, no need for sanity check?
 $item_username = $b->dispatch("/user/" .$item["email"] . "/") ->get([]);
 $photos = $item["photos"];
+
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+	echo "BUYING...............";
+	$transaction = $b->dispatch("/transaction/")->post([
+			"item_id" => $item_id,
+			"email" => $email,
+			"session_key" => $sk,
+			"price" => $item["price"]]);
+	if($transaction["result"] == "success"){
+		header( "location: show_trans.php?tid=".$transaction["trans_id"]);
+	}
+	else{
+		$buyInfo = "Failed..." . $transaction["reason"];
+	}
+}
 
 ?>
 
@@ -113,7 +128,9 @@ $photos = $item["photos"];
         <div class="panel-body">
           <?=$item["price"]?>
 <?php if ($item["email"] != $email && count($item["transactions"]) === 0) { ?>
-BBBBBBBBBBBBUUUUUUUUYYYYYYYYY
+	<form action="<?php echo $_SERVER['PHP_SELF']."?item_id=".$item_id; ?>" method="post">
+	<input type="submit" name="buy" value="BUY"> <?php echo $buyInfo; ?>
+	</form>
 <?php } ?>
         </div>
 
