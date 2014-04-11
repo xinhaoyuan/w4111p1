@@ -148,9 +148,9 @@ $messages = $transaction["messages"];
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <td>Sender</td>
-		          <td>Date</td>
-                  <td>Content</td>
+                  <th>Sender</th>
+		          <th>Date</th>
+                  <th>Content</th>
                 </tr>
               </thead>
               <tbody>
