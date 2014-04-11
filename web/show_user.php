@@ -16,9 +16,9 @@ $sk = $r['session_key'];
 // Retrieving the detail for this user
 $useremail = $_GET["email"];
 if($useremail != $email)
-	$user = $b->dispatch("/user/" . $email . "/")->get([]);
+	$user = $b->dispatch("/user/" . $useremail . "/")->get([]);
 else
-	$user = $b->dispatch("/user/" . $email . "/")->get(
+	$user = $b->dispatch("/user/" . $useremail . "/")->get(
 		["email" => $email,
 		"session_key" => $sk]);
 if(isset($_GET['new_address'])){
