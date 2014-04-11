@@ -19,6 +19,8 @@ class GroupManager extends DefaultIRest {
             return NULL;
         if ($name === "") {
             return $this;
+        } else if ($name === "list") {
+            return new GroupEnumerator();
         }
 
         $gname = $name;
@@ -88,6 +90,36 @@ class GroupManager extends DefaultIRest {
         return array("result" => "success",
                      "groups" => $groups);
                                              
+    }
+};
+
+class GroupEnumerator extends DefaultIRest {
+    public function get($args) {
+        $conditions = "";
+        if (isset($args["keyword"])) {
+            $keyword = $args["keyword"];
+            $conditions .= " WHERE (g.gname LIKE '%$keyword%' OR g.gdesc LIKE '%$keyword%')";
+        }
+        
+        try {
+            $conn = Backend::instance()->get_db_conn();
+            $r = Backend::instance()->sql_for_result(
+                $conn,
+                "SELECT g.gname, g.gdesc FROM tbl_group g" . $conditions);
+            $group_arr = [];
+            while ($group = sql_extract_assoc($r)) {
+                array_push($group_arr, array(
+                               "gname" => $group["GNAME"],
+                               "gdesc" => $group["GDESC"]));
+            }
+            Backend::instance()->sql_close_result($r);
+        } catch (Exception $e) {
+            return array("result" => "failed",
+                         "reason" => "sql error");
+        }
+
+        return array("result" => "success",
+                     "groups" => $group_arr);
     }
 };
 
